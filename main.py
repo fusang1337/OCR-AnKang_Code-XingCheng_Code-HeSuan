@@ -3,9 +3,9 @@ from paddleocr import PaddleOCR
 import re
 import shutil
 
-img_folder = r"C:\Users\THHICV\Documents\Program Files\check_acid_test\dist\截图"
-save_path = r"C:\Users\THHICV\Documents\Program Files\check_acid_test\dist\重命名"
-filename = r'结果.txt'
+img_folder = r"C:\Users\THHICV\Downloads\附件下载_20220521三码收集（收集结果）\源文件"
+save_path = r"C:\Users\THHICV\Downloads\附件下载_20220521三码收集（收集结果）\结果"
+filename = r'C:\Users\THHICV\Downloads\附件下载_20220521三码收集（收集结果）\结果.txt'
 
 print("要处理的目录为：",img_folder)
 print("重命名的文件保存在：",save_path)
@@ -74,6 +74,18 @@ for img_path in imgs:
         with open(filename, 'a') as f:  # 如果filename不存在会自动创建， 'w'表示写数据，写之前会清空文件中的原有数据！
             f.write(name_file+"&"+"安康码"+"&"+img_path+"&"+name_ocr+"&"+time_jietu+"&"+ma_result_ocr+"\n")
         shutil.copy(os.path.join(img_folder, img_path), os.path.join(save_path, name_file + "-" + "安康码" + ".jpeg"))
+    elif '区域核酸' in result_str:
+        result_str = re.sub("'", "", result_str)
+        result_str = re.sub(",", "", result_str)
+        name_ocr = match(r'(?<=姓名 )(.+?)(?= 身份)', result_str)
+        time_caiji = match(r'(?<=采集时间 )(.+?)(?= 检测)', result_str)
+        nucleic_result_ocr = match(r'(\S性)', result_str)
+        time_caiji = time_caiji[:10]
+        print(name_file + "核酸检测报告" + "&" + img_path + "&" + name_ocr + "&" + time_caiji + "&" + nucleic_result_ocr)
+        with open(filename, 'a') as f:  # 如果filename不存在会自动创建， 'w'表示写数据，写之前会清空文件中的原有数据！
+            f.write(
+                name_file + "&" + "核酸检测报告" + "&" + img_path + "&" + name_ocr + "&" + time_caiji + "&" + nucleic_result_ocr + "\n")
+        shutil.copy(os.path.join(img_folder, img_path), os.path.join(save_path, name_file + "-" + "核酸检测报告" + ".jpeg"))
 
     elif '行程卡' in result_str:
         result_str = re.sub("'", "", result_str)
@@ -91,4 +103,6 @@ for img_path in imgs:
         print(name_file+"判断出现错误"+"&"+img_path+"\n")
         with open(filename, 'a') as f:  # 如果filename不存在会自动创建， 'w'表示写数据，写之前会清空文件中的原有数据！
             f.write(name_file+"&"+"异常"+"&"+img_path+"&"+name_ocr+"&"+time_jietu+"&"+ma_result_ocr+"\n")
+        if not os.path.exists(os.path.join(save_path, "异常")):
+            os.mkdir(os.path.join(save_path, "异常"))
         shutil.copy(os.path.join(img_folder, img_path), os.path.join(save_path, "异常",name_file + "-" + "行程卡" + ".jpeg"))
